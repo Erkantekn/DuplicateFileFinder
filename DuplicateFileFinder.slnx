@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="DuplicateFileFinder.UI/DuplicateFileFinder.UI.csproj" Id="cbdbedd7-8646-4b23-bbd4-7301b9322deb" />
     <Project Path="src/DuplicateFileFinder.Application/DuplicateFileFinder.Application.csproj" />
     <Project Path="src/DuplicateFileFinder.Domain/DuplicateFileFinder.Domain.csproj" />
     <Project Path="src/DuplicateFileFinder.Infrastructure/DuplicateFileFinder.Infrastructure.csproj" Id="e4ee32aa-4f3a-4920-96a0-c675b3f62e1e" />
