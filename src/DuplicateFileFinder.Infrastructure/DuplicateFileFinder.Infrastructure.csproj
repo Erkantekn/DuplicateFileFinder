@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Hashing\" />
+    <Folder Include="Actions\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DuplicateFileFinder.Application\DuplicateFileFinder.Application.csproj" />
+  </ItemGroup>
+
+</Project>
