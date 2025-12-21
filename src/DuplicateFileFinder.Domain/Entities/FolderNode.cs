@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace DuplicateFileFinder.Domain
+namespace DuplicateFileFinder.Domain.Entities
 {
     public sealed class FolderNode
     {

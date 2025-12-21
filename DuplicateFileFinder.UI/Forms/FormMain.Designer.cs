@@ -28,18 +28,117 @@
         /// </summary>
         private void InitializeComponent()
         {
+            btnSelectFolder = new Button();
+            tvFolders = new TreeView();
+            btnScan = new Button();
+            lvDuplicates = new ListView();
+            colGroup = new ColumnHeader();
+            colFile = new ColumnHeader();
+            colSize = new ColumnHeader();
+            panel1 = new Panel();
+            progressBar = new ProgressBar();
+            panel1.SuspendLayout();
             SuspendLayout();
+            // 
+            // btnSelectFolder
+            // 
+            btnSelectFolder.Location = new Point(12, 264);
+            btnSelectFolder.Name = "btnSelectFolder";
+            btnSelectFolder.Size = new Size(285, 34);
+            btnSelectFolder.TabIndex = 0;
+            btnSelectFolder.Text = "Select Folder";
+            btnSelectFolder.UseVisualStyleBackColor = true;
+            btnSelectFolder.Click += btnSelectFolder_Click_1;
+            // 
+            // tvFolders
+            // 
+            tvFolders.CheckBoxes = true;
+            tvFolders.Location = new Point(12, 12);
+            tvFolders.Name = "tvFolders";
+            tvFolders.Size = new Size(285, 246);
+            tvFolders.TabIndex = 1;
+            // 
+            // btnScan
+            // 
+            btnScan.Enabled = false;
+            btnScan.Location = new Point(12, 304);
+            btnScan.Name = "btnScan";
+            btnScan.Size = new Size(285, 34);
+            btnScan.TabIndex = 2;
+            btnScan.Text = "Scan";
+            btnScan.UseVisualStyleBackColor = true;
+            btnScan.Click += btnScan_Click;
+            // 
+            // lvDuplicates
+            // 
+            lvDuplicates.Columns.AddRange(new ColumnHeader[] { colGroup, colFile, colSize });
+            lvDuplicates.FullRowSelect = true;
+            lvDuplicates.GridLines = true;
+            lvDuplicates.Location = new Point(15, 9);
+            lvDuplicates.MultiSelect = false;
+            lvDuplicates.Name = "lvDuplicates";
+            lvDuplicates.Size = new Size(682, 246);
+            lvDuplicates.TabIndex = 3;
+            lvDuplicates.UseCompatibleStateImageBehavior = false;
+            lvDuplicates.View = View.Details;
+            // 
+            // colGroup
+            // 
+            colGroup.Text = "Group";
+            colGroup.Width = 80;
+            // 
+            // colFile
+            // 
+            colFile.Text = "File Path";
+            colFile.Width = 500;
+            // 
+            // colSize
+            // 
+            colSize.Text = "Size (KB)";
+            colSize.Width = 100;
+            // 
+            // panel1
+            // 
+            panel1.Controls.Add(progressBar);
+            panel1.Controls.Add(lvDuplicates);
+            panel1.Location = new Point(314, 3);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(700, 335);
+            panel1.TabIndex = 4;
+            // 
+            // progressBar
+            // 
+            progressBar.Location = new Point(15, 261);
+            progressBar.Name = "progressBar";
+            progressBar.Size = new Size(682, 34);
+            progressBar.TabIndex = 4;
             // 
             // FormMain
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(1026, 450);
+            Controls.Add(panel1);
+            Controls.Add(btnScan);
+            Controls.Add(tvFolders);
+            Controls.Add(btnSelectFolder);
             Name = "FormMain";
             Text = "Duplicate File Finder";
+            Load += FormMain_Load;
+            panel1.ResumeLayout(false);
             ResumeLayout(false);
         }
 
         #endregion
+
+        private Button btnSelectFolder;
+        private TreeView tvFolders;
+        private Button btnScan;
+        private ListView lvDuplicates;
+        private ColumnHeader colGroup;
+        private ColumnHeader colFile;
+        private ColumnHeader colSize;
+        private Panel panel1;
+        private ProgressBar progressBar;
     }
 }

@@ -1,4 +1,6 @@
+using DuplicateFileFinder.Application.Interfaces;
 using DuplicateFileFinder.Infrastructure.FileSystem;
+using DuplicateFileFinder.Infrastructure.Hashing;
 using DuplicateFileFinder.UI.Presenters;
 
 namespace DuplicateFileFinder.UI
@@ -13,12 +15,13 @@ namespace DuplicateFileFinder.UI
         {
             ApplicationConfiguration.Initialize();
             var treeBuilder = new DirectoryTreeBuilder();
-
+            var fileScanner = new FileScanner();
+            IHashService hashService = new XxHashService();
             var form = new FormMain();
-            var presenter = new MainPresenter(form, treeBuilder);
+            var presenter = new MainPresenter(form, treeBuilder, fileScanner, hashService);
 
             form.SetPresenter(presenter);
-            System.Windows.Forms.Application.Run(new FormMain());
+            System.Windows.Forms.Application.Run(form);
         }
     }
 }

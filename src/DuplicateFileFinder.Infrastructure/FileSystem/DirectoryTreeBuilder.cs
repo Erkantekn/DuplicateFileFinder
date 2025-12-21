@@ -1,4 +1,4 @@
-﻿using DuplicateFileFinder.Domain;
+﻿using DuplicateFileFinder.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.IO;

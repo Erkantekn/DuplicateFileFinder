@@ -1,13 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Folder Include="Interfaces\" />
-    <Folder Include="Helpers\" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DuplicateFileFinder.Domain\DuplicateFileFinder.Domain.csproj" />
