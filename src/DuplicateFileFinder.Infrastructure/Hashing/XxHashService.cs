@@ -21,7 +21,7 @@ namespace DuplicateFileFinder.Infrastructure.Hashing
                 filePath,
                 FileMode.Open,
                 FileAccess.Read,
-                FileShare.Read,
+                FileShare.ReadWrite,
                 bufferSize: 1024 * 64,
                 useAsync: true);
 

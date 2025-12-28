@@ -3,6 +3,7 @@ using DuplicateFileFinder.Application.Interfaces;
 using DuplicateFileFinder.Domain.Entities;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -14,52 +15,78 @@ namespace DuplicateFileFinder.Application.Services
     {
         private readonly IFileScanner _fileScanner;
         private readonly IHashService _hashService;
-
+        private readonly IProgressReporter _progressReporter;
         public DuplicateAnalysisService(
             IFileScanner fileScanner,
-            IHashService hashService)
+            IHashService hashService,
+            IProgressReporter progressReporter)
         {
             _fileScanner = fileScanner;
             _hashService = hashService;
+            _progressReporter = progressReporter;
         }
 
         public async Task<IReadOnlyList<DuplicateGroup>> AnalyzeAsync(
-            ScanOptionsDto options,
-            CancellationToken cancellationToken)
+      ScanOptionsDto options,
+      CancellationToken cancellationToken)
         {
-            // 1. Dosyaları topla
             var files = _fileScanner
                 .ScanFiles(options.IncludedDirectories, cancellationToken)
                 .ToList();
 
-            // 2. FileEntry oluştur
             var entries = files.Select(path => new FileEntry
             {
                 FullPath = path,
-                Length = new System.IO.FileInfo(path).Length
+                Length = new FileInfo(path).Length
             }).ToList();
+            entries = entries
+                .GroupBy(e => e.FullPath, StringComparer.OrdinalIgnoreCase)
+                .Select(g => g.First())
+                .ToList();
+            int processed = 0;
+            int total = entries.Count;
 
-            // 3. Boyuta göre grupla (kritik optimizasyon)
             var sizeGroups = entries
                 .GroupBy(e => e.Length)
                 .Where(g => g.Count() > 1);
 
-            var duplicateGroups = new List<DuplicateGroup>();
+            var result = new List<DuplicateGroup>();
 
-            // 4. Aynı boyuttakiler için hash al
-            foreach (var sizeGroup in sizeGroups)
+            foreach (var group in sizeGroups)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                await ComputeHashesAsync(sizeGroup, cancellationToken);
+                foreach (var entry in group)
+                {
+                    try
+                    {
+                        entry.Hash = await _hashService
+                       .ComputeHashAsync(entry.FullPath, cancellationToken);
 
-                var hashGroups = sizeGroup
+                        processed++;
+                        int percent = (int)((processed / (double)total) * 100);
+                        _progressReporter?.Report(percent);
+                    }
+                    catch (IOException)
+                    {
+                        // skip locked file
+                        continue;
+                    }
+                    catch (UnauthorizedAccessException)
+                    {
+                        // skip protected file
+                        continue;
+                    }
+                   
+                }
+
+                var hashGroups = group
                     .GroupBy(e => e.Hash)
                     .Where(g => g.Count() > 1);
 
                 foreach (var hashGroup in hashGroups)
                 {
-                    duplicateGroups.Add(new DuplicateGroup
+                    result.Add(new DuplicateGroup
                     {
                         Hash = hashGroup.Key,
                         Files = hashGroup.ToList()
@@ -67,23 +94,10 @@ namespace DuplicateFileFinder.Application.Services
                 }
             }
 
-            return duplicateGroups;
+            return result;
         }
 
-        private async Task ComputeHashesAsync(
-            IEnumerable<FileEntry> entries,
-            CancellationToken cancellationToken)
-        {
-            var tasks = entries.Select(async entry =>
-            {
-                cancellationToken.ThrowIfCancellationRequested();
+       
 
-                entry.Hash = await _hashService
-                    .ComputeHashAsync(entry.FullPath, cancellationToken)
-                    .ConfigureAwait(false);
-            });
-
-            await Task.WhenAll(tasks).ConfigureAwait(false);
-        }
     }
 }

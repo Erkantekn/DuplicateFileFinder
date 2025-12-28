@@ -1,3 +1,4 @@
+using DuplicateFileFinder.Application.Utils;
 using DuplicateFileFinder.Domain.Entities;
 using DuplicateFileFinder.UI.Presenters;
 using DuplicateFileFinder.UI.Views;
@@ -14,22 +15,41 @@ namespace DuplicateFileFinder.UI
         }
         private void InitializeListView()
         {
-            lvDuplicates.Columns.Clear();
+            //lvDuplicates.Columns.Clear();
 
-            lvDuplicates.Columns.Add("Group", 80);
-            lvDuplicates.Columns.Add("File Path", 520);
-            lvDuplicates.Columns.Add("Size (KB)", 100);
+            //lvDuplicates.Columns.Add("Group", 80);
+            //lvDuplicates.Columns.Add("File Path", 520);
+            //lvDuplicates.Columns.Add("Size (KB)", 100);
         }
         public void SetPresenter(MainPresenter presenter)
         {
             _presenter = presenter;
         }
 
-        private void btnSelectFolder_Click(object sender, EventArgs e)
+        public IReadOnlyList<FolderSelection> GetCheckedFolders()
         {
-            _presenter.OnSelectRootFolder();
+            var result = new List<FolderSelection>();
+
+            foreach (TreeNode node in tvFolders.Nodes)
+                Collect(node, result);
+
+            return result;
         }
 
+        private void Collect(TreeNode node, IList<FolderSelection> result)
+        {
+            if (node.Checked)
+            {
+                result.Add(new FolderSelection
+                {
+                    FullPath = node.Tag.ToString(),
+                    ParentChecked = node.Parent?.Checked == true
+                });
+            }
+
+            foreach (TreeNode child in node.Nodes)
+                Collect(child, result);
+        }
         public void SetFolderTree(TreeNode rootNode)
         {
             rootNode.Nodes.Clear();
@@ -53,7 +73,7 @@ namespace DuplicateFileFinder.UI
                 return;
             }
 
-            _presenter.OnStartScan(selectedFolders);
+            _presenter.OnStartScan();
         }
 
         private void FormMain_Load(object sender, EventArgs e)
@@ -64,26 +84,41 @@ namespace DuplicateFileFinder.UI
 
         public void ShowDuplicates(IReadOnlyList<DuplicateGroup> groups)
         {
-            lvDuplicates.BeginUpdate();
-            lvDuplicates.Items.Clear();
-
-            int groupIndex = 1;
+            tvDuplicates.BeginUpdate();
+            tvDuplicates.Nodes.Clear();
 
             foreach (var group in groups)
             {
+                var firstFile = group.Files[0];
+                var fileName = Path.GetFileName(firstFile.FullPath);
+                var copyCount = group.Files.Count;
+                var sizeKb = firstFile.Length / 1024;
+
+                var singleSizeText = FileSizeFormatter.Format(firstFile.Length);
+                var totalSizeText = FileSizeFormatter.Format(firstFile.Length * copyCount);
+
+                var rootText =
+                    $"{fileName} | {copyCount} copies | {singleSizeText} x {copyCount} = {totalSizeText}";
+
+                var rootNode = new TreeNode(rootText)
+                {
+                    Tag = group
+                };
+
                 foreach (var file in group.Files)
                 {
-                    var item = new ListViewItem(groupIndex.ToString());
-                    item.SubItems.Add(file.FullPath);
-                    item.SubItems.Add((file.Length / 1024).ToString("N0"));
+                    var childNode = new TreeNode(file.FullPath)
+                    {
+                        Tag = file
+                    };
 
-                    lvDuplicates.Items.Add(item);
+                    rootNode.Nodes.Add(childNode);
                 }
 
-                groupIndex++;
+                tvDuplicates.Nodes.Add(rootNode);
             }
 
-            lvDuplicates.EndUpdate();
+            tvDuplicates.EndUpdate();
         }
 
         private void btnSelectFolder_Click_1(object sender, EventArgs e)
@@ -147,6 +182,72 @@ namespace DuplicateFileFinder.UI
             {
                 // Access denied vb. durumlarý sessizce geç
             }
+        }
+
+        public void SetBusy(bool isBusy)
+        {
+            btnScan.Enabled = !isBusy;
+            btnCancel.Enabled = isBusy;
+            progressBar.Visible = isBusy;
+
+            if (isBusy)
+                progressBar.Value = 0;
+        }
+
+
+        public void UpdateProgress(int percent)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() => UpdateProgress(percent)));
+                return;
+            }
+
+            progressBar.Value = Math.Min(100, percent);
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            _presenter.CancelScan();
+        }
+
+        private void tvFolders_AfterCheck(object sender, TreeViewEventArgs e)
+        {
+            if (e.Action == TreeViewAction.Unknown)
+                return;
+
+            SetChildCheckedState(e.Node, e.Node.Checked);
+
+            UpdateParentCheckedState(e.Node);
+        }
+        private void SetChildCheckedState(TreeNode node, bool isChecked)
+        {
+            foreach (TreeNode child in node.Nodes)
+            {
+                child.Checked = isChecked;
+                SetChildCheckedState(child, isChecked);
+            }
+        }
+        private void UpdateParentCheckedState(TreeNode node)
+        {
+            if (node.Parent == null)
+                return;
+
+            bool anyChecked = false;
+
+            foreach (TreeNode sibling in node.Parent.Nodes)
+            {
+                if (sibling.Checked)
+                {
+                    anyChecked = true;
+                    break;
+                }
+            }
+
+            node.Parent.Checked = anyChecked;
+
+            // Yukarý doðru devam
+            UpdateParentCheckedState(node.Parent);
         }
     }
 }

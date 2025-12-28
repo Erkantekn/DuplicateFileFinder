@@ -31,11 +31,9 @@
             btnSelectFolder = new Button();
             tvFolders = new TreeView();
             btnScan = new Button();
-            lvDuplicates = new ListView();
-            colGroup = new ColumnHeader();
-            colFile = new ColumnHeader();
-            colSize = new ColumnHeader();
             panel1 = new Panel();
+            btnCancel = new Button();
+            tvDuplicates = new TreeView();
             progressBar = new ProgressBar();
             panel1.SuspendLayout();
             SuspendLayout();
@@ -57,6 +55,7 @@
             tvFolders.Name = "tvFolders";
             tvFolders.Size = new Size(285, 246);
             tvFolders.TabIndex = 1;
+            tvFolders.AfterCheck += tvFolders_AfterCheck;
             // 
             // btnScan
             // 
@@ -69,48 +68,40 @@
             btnScan.UseVisualStyleBackColor = true;
             btnScan.Click += btnScan_Click;
             // 
-            // lvDuplicates
-            // 
-            lvDuplicates.Columns.AddRange(new ColumnHeader[] { colGroup, colFile, colSize });
-            lvDuplicates.FullRowSelect = true;
-            lvDuplicates.GridLines = true;
-            lvDuplicates.Location = new Point(15, 9);
-            lvDuplicates.MultiSelect = false;
-            lvDuplicates.Name = "lvDuplicates";
-            lvDuplicates.Size = new Size(682, 246);
-            lvDuplicates.TabIndex = 3;
-            lvDuplicates.UseCompatibleStateImageBehavior = false;
-            lvDuplicates.View = View.Details;
-            // 
-            // colGroup
-            // 
-            colGroup.Text = "Group";
-            colGroup.Width = 80;
-            // 
-            // colFile
-            // 
-            colFile.Text = "File Path";
-            colFile.Width = 500;
-            // 
-            // colSize
-            // 
-            colSize.Text = "Size (KB)";
-            colSize.Width = 100;
-            // 
             // panel1
             // 
+            panel1.Controls.Add(btnCancel);
+            panel1.Controls.Add(tvDuplicates);
             panel1.Controls.Add(progressBar);
-            panel1.Controls.Add(lvDuplicates);
             panel1.Location = new Point(314, 3);
             panel1.Name = "panel1";
             panel1.Size = new Size(700, 335);
             panel1.TabIndex = 4;
+            // 
+            // btnCancel
+            // 
+            btnCancel.Enabled = false;
+            btnCancel.Location = new Point(15, 301);
+            btnCancel.Name = "btnCancel";
+            btnCancel.Size = new Size(682, 34);
+            btnCancel.TabIndex = 6;
+            btnCancel.Text = "Cancel";
+            btnCancel.UseVisualStyleBackColor = true;
+            btnCancel.Click += btnCancel_Click;
+            // 
+            // tvDuplicates
+            // 
+            tvDuplicates.Location = new Point(15, 9);
+            tvDuplicates.Name = "tvDuplicates";
+            tvDuplicates.Size = new Size(682, 246);
+            tvDuplicates.TabIndex = 5;
             // 
             // progressBar
             // 
             progressBar.Location = new Point(15, 261);
             progressBar.Name = "progressBar";
             progressBar.Size = new Size(682, 34);
+            progressBar.Style = ProgressBarStyle.Continuous;
             progressBar.TabIndex = 4;
             // 
             // FormMain
@@ -134,11 +125,9 @@
         private Button btnSelectFolder;
         private TreeView tvFolders;
         private Button btnScan;
-        private ListView lvDuplicates;
-        private ColumnHeader colGroup;
-        private ColumnHeader colFile;
-        private ColumnHeader colSize;
         private Panel panel1;
         private ProgressBar progressBar;
+        private TreeView tvDuplicates;
+        private Button btnCancel;
     }
 }
