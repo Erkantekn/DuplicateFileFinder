@@ -1,13 +1,16 @@
 ﻿using DuplicateFileFinder.Application.Dtos;
 using DuplicateFileFinder.Application.Interfaces;
 using DuplicateFileFinder.Application.Services;
+using DuplicateFileFinder.Application.Utils;
 using DuplicateFileFinder.Domain.Entities;
 using DuplicateFileFinder.Infrastructure.FileSystem;
 using DuplicateFileFinder.Infrastructure.Hashing;
+using DuplicateFileFinder.UI.Forms;
 using DuplicateFileFinder.UI.Progress;
 using DuplicateFileFinder.UI.Views;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,6 +24,7 @@ namespace DuplicateFileFinder.UI.Presenters
         private readonly IFileScanner _fileScanner;
         private readonly DuplicateAnalysisService _analysisService;
         private CancellationTokenSource _cts;
+        private FormDetail formDetail;
         public MainPresenter(
             IMainView view,
             DirectoryTreeBuilder treeBuilder,
@@ -36,7 +40,8 @@ namespace DuplicateFileFinder.UI.Presenters
             _analysisService = new DuplicateAnalysisService(
                 fileScanner,
                 hashService,
-                progressReporter);
+                progressReporter,
+                _view);
         }
         public IReadOnlyList<string> GetSelectedFolders(TreeView treeView)
         {
@@ -112,6 +117,7 @@ namespace DuplicateFileFinder.UI.Presenters
         {
             try
             {
+                _view.UpdateStatus(StatusTextProvider.GetText(Domain.Enums.ScanStatus.Scanning));
                 _cts = new CancellationTokenSource();
                 _view.SetBusy(true);
 
@@ -131,7 +137,11 @@ namespace DuplicateFileFinder.UI.Presenters
                 var result = await _analysisService
                     .AnalyzeAsync(options, _cts.Token);
 
-                _view.ShowDuplicates(result);
+                _view.ShowDuplicates(result.Duplicates);
+                _view.ShowSummary(result.Summary);
+
+                formDetail = new FormDetail(result);
+
             }
             catch (OperationCanceledException)
             {
@@ -145,8 +155,12 @@ namespace DuplicateFileFinder.UI.Presenters
 
         public void CancelScan()
         {
+            _view.UpdateStatus(StatusTextProvider.GetText(Domain.Enums.ScanStatus.Cancelled));
             _cts?.Cancel();
         }
-
+        public void ShowDetails()
+        {
+            if (formDetail != null) formDetail.ShowDialog();
+        }
     }
 }

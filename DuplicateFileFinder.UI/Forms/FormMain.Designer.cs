@@ -32,9 +32,11 @@
             tvFolders = new TreeView();
             btnScan = new Button();
             panel1 = new Panel();
+            btnShowDetails = new Button();
             btnCancel = new Button();
             tvDuplicates = new TreeView();
             progressBar = new ProgressBar();
+            lblStatus = new Label();
             panel1.SuspendLayout();
             SuspendLayout();
             // 
@@ -44,7 +46,7 @@
             btnSelectFolder.Name = "btnSelectFolder";
             btnSelectFolder.Size = new Size(285, 34);
             btnSelectFolder.TabIndex = 0;
-            btnSelectFolder.Text = "Select Folder";
+            btnSelectFolder.Text = "Add Folder";
             btnSelectFolder.UseVisualStyleBackColor = true;
             btnSelectFolder.Click += btnSelectFolder_Click_1;
             // 
@@ -65,18 +67,29 @@
             btnScan.Size = new Size(285, 34);
             btnScan.TabIndex = 2;
             btnScan.Text = "Scan";
-            btnScan.UseVisualStyleBackColor = true;
             btnScan.Click += btnScan_Click;
             // 
             // panel1
             // 
+            panel1.Controls.Add(btnShowDetails);
             panel1.Controls.Add(btnCancel);
             panel1.Controls.Add(tvDuplicates);
             panel1.Controls.Add(progressBar);
             panel1.Location = new Point(314, 3);
             panel1.Name = "panel1";
-            panel1.Size = new Size(700, 335);
+            panel1.Size = new Size(700, 415);
             panel1.TabIndex = 4;
+            // 
+            // btnShowDetails
+            // 
+            btnShowDetails.Location = new Point(15, 341);
+            btnShowDetails.Name = "btnShowDetails";
+            btnShowDetails.Size = new Size(682, 34);
+            btnShowDetails.TabIndex = 7;
+            btnShowDetails.Text = "Show Details";
+            btnShowDetails.UseVisualStyleBackColor = true;
+            btnShowDetails.Visible = false;
+            btnShowDetails.Click += btnShowDetails_Click;
             // 
             // btnCancel
             // 
@@ -104,11 +117,23 @@
             progressBar.Style = ProgressBarStyle.Continuous;
             progressBar.TabIndex = 4;
             // 
+            // lblStatus
+            // 
+            lblStatus.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            lblStatus.ForeColor = Color.DarkGray;
+            lblStatus.Location = new Point(414, 421);
+            lblStatus.Name = "lblStatus";
+            lblStatus.Size = new Size(600, 20);
+            lblStatus.TabIndex = 5;
+            lblStatus.Text = "Waiting for start";
+            lblStatus.TextAlign = ContentAlignment.MiddleRight;
+            // 
             // FormMain
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1026, 450);
+            Controls.Add(lblStatus);
             Controls.Add(panel1);
             Controls.Add(btnScan);
             Controls.Add(tvFolders);
@@ -129,5 +154,7 @@
         private ProgressBar progressBar;
         private TreeView tvDuplicates;
         private Button btnCancel;
+        private Label lblStatus;
+        private Button btnShowDetails;
     }
 }

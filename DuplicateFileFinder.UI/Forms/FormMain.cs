@@ -1,7 +1,11 @@
+using DuplicateFileFinder.Application.Dtos;
+using DuplicateFileFinder.Application.Interfaces;
 using DuplicateFileFinder.Application.Utils;
 using DuplicateFileFinder.Domain.Entities;
+using DuplicateFileFinder.UI.Forms;
 using DuplicateFileFinder.UI.Presenters;
 using DuplicateFileFinder.UI.Views;
+using System.Windows.Forms;
 
 namespace DuplicateFileFinder.UI
 {
@@ -61,15 +65,18 @@ namespace DuplicateFileFinder.UI
         {
             MessageBox.Show(message, "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
+            UpdateStatus(message);
         }
 
         private void btnScan_Click(object sender, EventArgs e)
         {
+            UpdateStatus(StatusTextProvider.GetText(Domain.Enums.ScanStatus.Preparing));
             var selectedFolders = _presenter.GetSelectedFolders(tvFolders);
 
             if (selectedFolders.Count == 0)
             {
                 MessageBox.Show("Please select at least one folder.");
+                UpdateStatus("Please select at least one folder.");
                 return;
             }
 
@@ -79,7 +86,7 @@ namespace DuplicateFileFinder.UI
         private void FormMain_Load(object sender, EventArgs e)
         {
             InitializeListView();
-
+            UpdateStatus(StatusTextProvider.GetText(Domain.Enums.ScanStatus.Idle));
         }
 
         public void ShowDuplicates(IReadOnlyList<DuplicateGroup> groups)
@@ -119,6 +126,7 @@ namespace DuplicateFileFinder.UI
             }
 
             tvDuplicates.EndUpdate();
+            btnShowDetails.Visible = true;
         }
 
         private void btnSelectFolder_Click_1(object sender, EventArgs e)
@@ -248,6 +256,27 @@ namespace DuplicateFileFinder.UI
 
             // Yukarý doðru devam
             UpdateParentCheckedState(node.Parent);
+        }
+        public void UpdateStatus(string text)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(() => UpdateStatus(text)));
+                return;
+            }
+
+            lblStatus.Text = text;
+        }
+
+        public void ShowSummary(ScanSummaryDto summary)
+        {
+            using var dlg = new FormScanSummary(summary);
+            dlg.ShowDialog(this);
+        }
+
+        private void btnShowDetails_Click(object sender, EventArgs e)
+        {
+            _presenter.ShowDetails();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using DuplicateFileFinder.Application.Dtos;
 using DuplicateFileFinder.Application.Interfaces;
+using DuplicateFileFinder.Application.Utils;
 using DuplicateFileFinder.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -16,17 +17,21 @@ namespace DuplicateFileFinder.Application.Services
         private readonly IFileScanner _fileScanner;
         private readonly IHashService _hashService;
         private readonly IProgressReporter _progressReporter;
+        private readonly IMainViewUpdateStatus _viewUpdateStatus;
+
         public DuplicateAnalysisService(
             IFileScanner fileScanner,
             IHashService hashService,
-            IProgressReporter progressReporter)
+            IProgressReporter progressReporter,
+            IMainViewUpdateStatus viewUpdateStatus)
         {
             _fileScanner = fileScanner;
             _hashService = hashService;
             _progressReporter = progressReporter;
+            _viewUpdateStatus = viewUpdateStatus;
         }
 
-        public async Task<IReadOnlyList<DuplicateGroup>> AnalyzeAsync(
+        public async Task<ScanResult> AnalyzeAsync(
       ScanOptionsDto options,
       CancellationToken cancellationToken)
         {
@@ -44,11 +49,11 @@ namespace DuplicateFileFinder.Application.Services
                 .Select(g => g.First())
                 .ToList();
             int processed = 0;
-            int total = entries.Count;
-
             var sizeGroups = entries
                 .GroupBy(e => e.Length)
                 .Where(g => g.Count() > 1);
+            int total = sizeGroups.Sum(g => g.Count());
+            _viewUpdateStatus.UpdateStatus(StatusTextProvider.GetText(Domain.Enums.ScanStatus.Scanning, 0, total));
 
             var result = new List<DuplicateGroup>();
 
@@ -66,6 +71,8 @@ namespace DuplicateFileFinder.Application.Services
                         processed++;
                         int percent = (int)((processed / (double)total) * 100);
                         _progressReporter?.Report(percent);
+                        _viewUpdateStatus.UpdateStatus(StatusTextProvider.GetText(Domain.Enums.ScanStatus.Scanning,
+                            processed, total));
                     }
                     catch (IOException)
                     {
@@ -77,7 +84,7 @@ namespace DuplicateFileFinder.Application.Services
                         // skip protected file
                         continue;
                     }
-                   
+
                 }
 
                 var hashGroups = group
@@ -93,11 +100,24 @@ namespace DuplicateFileFinder.Application.Services
                     });
                 }
             }
+            _viewUpdateStatus.UpdateStatus(StatusTextProvider.GetText(Domain.Enums.ScanStatus.Completed));
 
-            return result;
+            var summary = new ScanSummaryDto
+            {
+                FileCount = entries.Count,
+                TotalSizeBytes = entries.Sum(e => e.Length),
+                DuplicateFileCount = result.Sum(g => g.Files.Count),
+                DuplicateSizeBytes = result.Sum(g => g.Files.Sum(f => f.Length))
+            };
+
+            return new ScanResult
+            {
+                Duplicates = result,
+                Summary = summary
+            };
         }
 
-       
+
 
     }
 }

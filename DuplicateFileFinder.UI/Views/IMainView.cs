@@ -1,4 +1,6 @@
-﻿using DuplicateFileFinder.Domain.Entities;
+﻿using DuplicateFileFinder.Application.Dtos;
+using DuplicateFileFinder.Application.Interfaces;
+using DuplicateFileFinder.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DuplicateFileFinder.UI.Views
 {
-    public interface IMainView
+    public interface IMainView : IMainViewUpdateStatus
     {
         void SetFolderTree(TreeNode rootNode);
         void ShowError(string message);
@@ -15,5 +17,6 @@ namespace DuplicateFileFinder.UI.Views
         void SetBusy(bool isBusy);
         void UpdateProgress(int percent);
         IReadOnlyList<FolderSelection> GetCheckedFolders();
+        void ShowSummary(ScanSummaryDto summary);
     }
 }
