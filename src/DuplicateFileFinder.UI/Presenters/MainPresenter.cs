@@ -49,7 +49,7 @@ namespace DuplicateFileFinder.UI.Presenters
 
             foreach (TreeNode node in treeView.Nodes)
             {
-                
+
                 CollectCheckedNodes(node, result);
             }
 
@@ -140,7 +140,7 @@ namespace DuplicateFileFinder.UI.Presenters
                 _view.ShowDuplicates(result.Duplicates);
                 _view.ShowSummary(result.Summary);
 
-                formDetail = new FormDetail(result);
+                formDetail = new FormDetail(result, _view);
 
             }
             catch (OperationCanceledException)

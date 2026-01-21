@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\DuplicateFileFinder.Infrastructure\DuplicateFileFinder.Infrastructure.csproj" />
+    <ProjectReference Include="..\DuplicateFileFinder.Infrastructure\DuplicateFileFinder.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

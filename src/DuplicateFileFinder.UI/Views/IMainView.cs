@@ -18,5 +18,6 @@ namespace DuplicateFileFinder.UI.Views
         void UpdateProgress(int percent);
         IReadOnlyList<FolderSelection> GetCheckedFolders();
         void ShowSummary(ScanSummaryDto summary);
+        void Reset();
     }
 }

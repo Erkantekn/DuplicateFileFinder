@@ -278,5 +278,14 @@ namespace DuplicateFileFinder.UI
         {
             _presenter.ShowDetails();
         }
+
+        public void Reset()
+        {
+            UpdateStatus(StatusTextProvider.GetText(Domain.Enums.ScanStatus.Idle));
+            _selectedFolders.Clear();
+            tvDuplicates.Nodes.Clear();
+            tvFolders.Nodes.Clear();
+            btnShowDetails.Visible = false;
+        }
     }
 }
