@@ -52,21 +52,41 @@ namespace DuplicateFileFinder.UI.Forms
 
         private void btnDelete_Click(object sender, EventArgs e)
         {
-            var filesToDelete = GetCheckedFiles();
+            var filesToDelete = new List<FileEntry>();
+
+            foreach (TreeNode root in tvDuplicates.Nodes)
+            {
+                var files = root.Nodes
+                    .Cast<TreeNode>()
+                    .Select(n => n.Tag as FileEntry)
+                    .Where(f => f != null)
+                    .ToList();
+
+                if (files.Count <= 1)
+                    continue;
+
+                var fileToKeep = files
+                    .OrderBy(f => File.GetCreationTime(f.FullPath))
+                    .First();
+
+                var toDelete = files
+                    .Where(f => f.FullPath != fileToKeep.FullPath);
+
+                filesToDelete.AddRange(toDelete);
+            }
 
             if (!filesToDelete.Any())
             {
-                MessageBox.Show("No file to delete has been selected.",
-                    "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("No duplicate files found to delete.");
                 return;
             }
 
             long totalSize = filesToDelete.Sum(f => f.Length);
 
             var confirm = MessageBox.Show(
-                $"{filesToDelete.Count} files will be deleted.\n" +
+                $"{filesToDelete.Count} duplicate files will be deleted.\n" +
                 $"Total Size: {FileSizeFormatter.Format(totalSize)}\n\n" +
-                $"Do you want to continue?",
+                $"Oldest files will be preserved.\n\nContinue?",
                 "Delete Confirmation",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Warning);
@@ -85,13 +105,13 @@ namespace DuplicateFileFinder.UI.Forms
                 }
                 catch
                 {
-                    // erişilemeyen dosyalar atlanır
+                    // continue for not accesable files
                 }
             }
 
             MessageBox.Show(
-                $"{deletedCount} files deleted.",
-                "Process Completed",
+                $"{deletedCount} files deleted successfully.",
+                "Completed",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
 
@@ -99,34 +119,18 @@ namespace DuplicateFileFinder.UI.Forms
             _mainForm.Reset();
             this.Close();
         }
-        private List<FileEntry> GetCheckedFiles()
-        {
-            var result = new List<FileEntry>();
-
-            foreach (TreeNode root in tvDuplicates.Nodes)
-            {
-                foreach (TreeNode node in root.Nodes)
-                {
-                    if (/*node.Checked && */node.Tag is FileEntry file)
-                    {
-                        result.Add(file);
-                    }
-                }
-            }
-
-            return result;
-        }
+       
         private void RemoveDeletedNodes()
         {
             foreach (TreeNode root in tvDuplicates.Nodes.Cast<TreeNode>().ToList())
             {
                 foreach (TreeNode node in root.Nodes.Cast<TreeNode>().ToList())
                 {
-                    if (node.Checked)
+                    if (!File.Exists(((FileEntry)node.Tag).FullPath))
                         root.Nodes.Remove(node);
                 }
 
-                if (root.Nodes.Count == 0)
+                if (root.Nodes.Count <= 1)
                     tvDuplicates.Nodes.Remove(root);
             }
         }
